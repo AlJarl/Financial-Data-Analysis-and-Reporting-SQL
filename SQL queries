@@ -1,0 +1,124 @@
+-- 1. Calculate the total revenue for each year.
+SELECT YEAR(transaction_date) AS year, SUM(revenue) AS total_revenue
+FROM financial_data
+GROUP BY year
+ORDER BY year;
+
+-- 2. Calculate the average quarterly profit margin.
+SELECT EXTRACT(QUARTER FROM transaction_date) AS quarter, AVG(profit / revenue) AS avg_profit_margin
+FROM financial_data
+GROUP BY quarter
+ORDER BY quarter;
+
+-- 3. Find the top 10 customers with the highest lifetime value.
+SELECT customer_id, SUM(revenue) AS lifetime_value
+FROM financial_data
+GROUP BY customer_id
+ORDER BY lifetime_value DESC
+LIMIT 10;
+
+-- 4. Identify months with the highest and lowest sales.
+SELECT EXTRACT(MONTH FROM transaction_date) AS month, SUM(sales) AS total_sales
+FROM financial_data
+GROUP BY month
+ORDER BY total_sales DESC, month
+LIMIT 1
+UNION ALL
+SELECT EXTRACT(MONTH FROM transaction_date) AS month, SUM(sales) AS total_sales
+FROM financial_data
+GROUP BY month
+ORDER BY total_sales, month
+LIMIT 1;
+
+-- 5. Calculate the moving average of revenue over a 3-month period.
+SELECT transaction_date, revenue,
+       AVG(revenue) OVER (ORDER BY transaction_date ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS moving_avg_revenue
+FROM financial_data
+ORDER BY transaction_date;
+
+-- 6. Determine the month with the highest percentage increase in revenue compared to the previous month.
+SELECT EXTRACT(MONTH FROM transaction_date) AS month, 
+       (SUM(revenue) - LAG(SUM(revenue)) OVER (ORDER BY month)) / LAG(SUM(revenue)) OVER (ORDER BY month) AS revenue_increase_percentage
+FROM financial_data
+GROUP BY month
+ORDER BY revenue_increase_percentage DESC
+LIMIT 1;
+
+-- 7. Calculate the Price to Earnings (P/E) ratio for each stock.
+SELECT stock_symbol, SUM(stock_price) / SUM(earnings_per_share) AS pe_ratio
+FROM stock_data
+GROUP BY stock_symbol;
+
+-- 8. Calculate the Return on Investment (ROI) for each investment.
+SELECT investment_id, (final_value - initial_investment) / initial_investment AS roi
+FROM investment_data;
+
+-- 9. Find the top 5 performing stocks based on ROI.
+SELECT stock_symbol, (final_value - initial_investment) / initial_investment AS roi
+FROM investment_data
+ORDER BY roi DESC
+LIMIT 5;
+
+-- 10. Calculate the correlation between the stock price and earnings per share.
+SELECT CORR(stock_price, earnings_per_share) AS price_eps_correlation
+FROM stock_data;
+
+-- 11. Calculate the net profit for each quarter.
+SELECT EXTRACT(QUARTER FROM transaction_date) AS quarter, 
+       SUM(profit) AS net_profit
+FROM financial_data
+GROUP BY quarter
+ORDER BY quarter;
+
+-- 12. Identify customers who made a purchase in all quarters.
+SELECT customer_id
+FROM financial_data
+GROUP BY customer_id
+HAVING COUNT(DISTINCT EXTRACT(QUARTER FROM transaction_date)) = 4;
+
+-- 13. Calculate the 90th percentile of daily trading volume for a stock.
+SELECT stock_symbol, PERCENTILE_CONT(0.9) WITHIN GROUP (ORDER BY trading_volume) AS volume_90th_percentile
+FROM stock_data
+GROUP BY stock_symbol;
+
+-- 14. Find the average transaction size for each customer.
+SELECT customer_id, AVG(transaction_size) AS avg_transaction_size
+FROM financial_data
+GROUP BY customer_id;
+
+-- 15. Calculate the median profit margin.
+SELECT EXTRACT(MONTH FROM transaction_date) AS month, 
+       PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY profit / revenue) AS median_profit_margin
+FROM financial_data
+GROUP BY month;
+
+-- 16. Calculate the compound annual growth rate (CAGR) for a specific investment.
+-- Replace 'investment_id' with the actual investment you want to calculate CAGR for.
+SELECT POWER((final_value / initial_investment), (1.0 / (YEAR(MAX(transaction_date)) - YEAR(MIN(transaction_date)))) - 1) AS cagr
+FROM investment_data
+WHERE investment_id = 'your_investment_id';
+
+-- 17. Find the top 5 stocks with the lowest Price to Earnings (P/E) ratios.
+SELECT stock_symbol, SUM(stock_price) / SUM(earnings_per_share) AS pe_ratio
+FROM stock_data
+GROUP BY stock_symbol
+ORDER BY pe_ratio
+LIMIT 5;
+
+-- 18. Calculate the standard deviation of daily returns for a stock.
+SELECT stock_symbol, STDDEV(stock_return) AS daily_return_stddev
+FROM stock_data
+GROUP BY stock_symbol;
+
+-- 19. Calculate the Z-score for quarterly revenue to identify outliers.
+SELECT EXTRACT(QUARTER FROM transaction_date) AS quarter, 
+       (SUM(revenue) - AVG(revenue)) / STDDEV(revenue) AS z_score
+FROM financial_data
+GROUP BY quarter;
+
+-- 20. Find the top 5 customers with the highest total transaction value.
+SELECT customer_id, SUM(transaction_value) AS total_transaction_value
+FROM financial_data
+GROUP BY customer_id
+ORDER BY total_transaction_value DESC
+LIMIT 5;
