@@ -1,5 +1,5 @@
 
-**Project Title: Financial Data Analysis and Reporting with SQL**
+# Financial Data Analysis and Reporting with SQL
 
 
 In this project, I used SQL to analyze financial data and generate meaningful reports and insights.
